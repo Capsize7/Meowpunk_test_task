@@ -6,7 +6,7 @@ from memory_profiler import memory_usage
 def create_empty_table():
     table_query = '''CREATE TABLE IF NOT EXISTS result
         (
-            timestamp text,
+            timestamp integer,
             player_id text,
             event_id text,
             error_id text,
@@ -45,6 +45,7 @@ def create_table():
     JOIN client as c USING(error_id)
     WHERE c.player_id not in (SELECT player_id FROM cheaters) or
     s.timestamp - (SELECT unixepoch(ban_time) FROM cheaters where c.player_id = player_id) < 86400'''
+    
     connection = sqlite3.connect('cheaters.db')
     cursor = connection.cursor()
     cursor.execute(table_query)
@@ -52,9 +53,10 @@ def create_table():
     connection.close()
 
 if __name__ == '__main__':
+    date = '2021-01-05' # example, change to your needed date in format: yyyy-mm-dd
     mem_usage_1 = memory_usage(create_empty_table)
-    mem_usage_2 = memory_usage((create_table_from_csv, ('2021-01-05', 'server.csv')))
-    mem_usage_3 = memory_usage((create_table_from_csv, ('2021-01-05', 'client.csv')))
+    mem_usage_2 = memory_usage((create_table_from_csv, (date, 'server.csv')))
+    mem_usage_3 = memory_usage((create_table_from_csv, (date, 'client.csv')))
     mem_usage_4 = memory_usage(create_table)
     print(f'The maximum of memory usage is '
           f'{round(max(mem_usage_1)+max(mem_usage_2)+max(mem_usage_3)+max(mem_usage_4), 2)} MiB')
